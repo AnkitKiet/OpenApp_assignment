@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">OpenApp</string>
+    <string name="list">View All</string>
+    <string name="add">Add New Member</string>
+    <string name="gallery">Gallery</string>
+    <string name="openDrawer">Open</string>
+    <string name="closeDrawer">Close</string>
+    <string name="edit">Update Details</string>
+</resources>

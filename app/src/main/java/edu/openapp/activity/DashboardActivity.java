@@ -74,6 +74,8 @@ public class DashboardActivity extends BaseActivity {
                         startActivity(openActivity(DashboardActivity.this,AddMemberActivity.class));
                         return true;
                     case R.id.gallery:
+                        startActivity(openActivity(DashboardActivity.this,GalleryActivity.class));
+
                         return true;
 
                     default:

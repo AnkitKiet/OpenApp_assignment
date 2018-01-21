@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
+import edu.openapp.activity.EditMemberActivity;
 import edu.openapp.global.AppDatabase;
 import edu.openapp.model.MemberModel;
 
@@ -14,9 +15,10 @@ import edu.openapp.model.MemberModel;
 public class EditMemberPresenter {
 
     Context context;
-
-    public EditMemberPresenter(Context context) {
+    EditMemberActivity editMemberActivity;
+    public EditMemberPresenter(Context context, EditMemberActivity editMemberActivity) {
         this.context = context;
+        this.editMemberActivity=editMemberActivity;
     }
 
 
@@ -48,6 +50,7 @@ public class EditMemberPresenter {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             Toast.makeText(context, "Updated", Toast.LENGTH_SHORT).show();
+            editMemberActivity.finishUpdate();
         }
     }
 }

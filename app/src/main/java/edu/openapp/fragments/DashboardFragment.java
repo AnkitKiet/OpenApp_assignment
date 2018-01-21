@@ -1,5 +1,6 @@
 package edu.openapp.fragments;
 
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,24 +10,33 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import edu.openapp.R;
 import edu.openapp.adapters.MemberListAdapter;
 import edu.openapp.global.AppDatabase;
 import edu.openapp.model.MemberModel;
+import edu.openapp.presenter.DashboardPresenter;
+import edu.openapp.view.DashboardView;
 
 /**
  * Created by Ankit on 19/01/18.
  */
 
-public class DashboardFragment extends Fragment {
+public class DashboardFragment extends Fragment implements DashboardView {
 
     private View parentView;
     private AppDatabase appDatabase;
-    private RecyclerView recycler;
+    @Bind(R.id.recycler)
+    RecyclerView recycler;
+    @Bind(R.id.progressbar)
+    public ProgressBar progressBar;
     public MemberListAdapter listAdapter;
     public List<MemberModel> list;
 
@@ -34,54 +44,36 @@ public class DashboardFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         parentView = inflater.inflate(R.layout.fragment_list, container, false);
-        recycler = parentView.findViewById(R.id.recycler);
         populate();
         return parentView;
     }
-
-    private void populate() {
+    @Override
+    public void populate() {
+        ButterKnife.bind(this, parentView);
         list = new ArrayList<>();
+        progressBar.setVisibility(View.VISIBLE);
         appDatabase = AppDatabase.getDatabase(getActivity().getApplication());
         getAllMembers();
 
 
     }
 
+    @Override
     public void getAllMembers() {
-        new getAllMembersAsyncTask(appDatabase).execute();
+       DashboardPresenter presenter= new DashboardPresenter(getActivity(),this);
+        presenter.getMember(appDatabase);
     }
 
-    private class getAllMembersAsyncTask extends AsyncTask<Void, Void, Void> {
-
-        private AppDatabase db;
-
-        getAllMembersAsyncTask(AppDatabase appDatabase) {
-            db = appDatabase;
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            list = db.itemAndPersonModel().getAllMember();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if(getActivity() == null)
-                return;
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    setAdapter();
-                }
-            });
-        }
+    @Override
+    public void setList(List<MemberModel> list) {
+        this.list = list;
+        setAdapter();
     }
 
-
-
-    private void setAdapter() {
+    @Override
+    public void setAdapter() {
+        Collections.sort(list, Collections.<MemberModel>reverseOrder());
+        progressBar.setVisibility(View.GONE);
         listAdapter = new MemberListAdapter(getActivity(), list);
         recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         recycler.setHasFixedSize(true);

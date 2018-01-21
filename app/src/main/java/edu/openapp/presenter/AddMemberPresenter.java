@@ -3,8 +3,11 @@ package edu.openapp.presenter;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import edu.openapp.activity.AddMemberActivity;
+import edu.openapp.activity.EditMemberActivity;
 import edu.openapp.global.AppDatabase;
 import edu.openapp.model.MemberModel;
+import edu.openapp.view.AddMemberView;
 
 /**
  * Created by Ankit on 19/01/18.
@@ -13,9 +16,10 @@ import edu.openapp.model.MemberModel;
 public class AddMemberPresenter {
 
     private Context context;
-
-    public AddMemberPresenter(Context context) {
+    private AddMemberActivity addMemberActivity;
+    public AddMemberPresenter(Context context,AddMemberActivity addMemberActivity) {
         this.context = context;
+        this.addMemberActivity=addMemberActivity;
     }
 
 
@@ -46,6 +50,8 @@ public class AddMemberPresenter {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            addMemberActivity.finishUpdate();
+
         }
     }
 

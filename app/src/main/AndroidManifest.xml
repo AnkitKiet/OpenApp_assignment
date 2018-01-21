@@ -37,8 +37,7 @@
             android:configChanges="orientation|screenSize|keyboardHidden" />
         <activity
             android:name=".activity.EditMemberActivity"
-            android:configChanges="screenSize|orientation"
-            android:parentActivityName=".activity.DashboardActivity" />
+            android:configChanges="screenSize|orientation" />
         <activity
             android:name=".activity.AddMemberActivity"
             android:configChanges="keyboardHidden|screenSize|orientation" />

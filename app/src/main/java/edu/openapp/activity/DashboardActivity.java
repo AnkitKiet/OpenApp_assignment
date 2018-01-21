@@ -32,7 +32,6 @@ public class DashboardActivity extends BaseActivity {
     DrawerLayout drawerLayout;
     private MenuItem previousMenuItem;
     private View header;
-    private static Fragment resultFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +43,6 @@ public class DashboardActivity extends BaseActivity {
         header = navigationView.getHeaderView(0);
         final CircleImageView profilePhoto = (CircleImageView) header.findViewById(R.id.profile_image);
         TextView txtWelcome = (TextView) header.findViewById(R.id.txtWelcome);
-        TextView txtName = (TextView) header.findViewById(R.id.txtName);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
 
             @Override

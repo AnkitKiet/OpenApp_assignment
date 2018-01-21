@@ -50,8 +50,12 @@ public class MemberListAdapter extends RecyclerView.Adapter<MemberListAdapter.Re
 
         holder.txtName.setText(MemberModelList.get(position).getName());
         Date ludate = MemberModelList.get(position).getTimestamp();
+        int yr = ludate.getYear();
+        if (yr > 100) {
+            yr = ludate.getYear() - 100;
+        }
 
-        String ldate = ludate.getDate() + "/" + ludate.getMonth() + "/" + ludate.getYear();
+        String ldate = ludate.getDate() + "/" + ludate.getMonth() + "/" + yr;
         holder.txtLUD.setText(ldate);
         holder.btnEdit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,8 +67,8 @@ public class MemberListAdapter extends RecyclerView.Adapter<MemberListAdapter.Re
                 context.startActivity(intent);
             }
         });
-        File f = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "file" + MemberModelList.get(position).getName() + ".jpg");
 
+        File f = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "file" + MemberModelList.get(position).getImage() + ".jpg");
         Bitmap bitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);

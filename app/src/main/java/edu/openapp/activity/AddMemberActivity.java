@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,10 +29,12 @@ import java.util.Date;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import edu.openapp.R;
 import edu.openapp.global.AppDatabase;
 import edu.openapp.model.MemberModel;
 import edu.openapp.presenter.AddMemberPresenter;
+import edu.openapp.view.AddMemberView;
 import me.shaohui.advancedluban.Luban;
 import me.shaohui.advancedluban.OnCompressListener;
 
@@ -39,7 +42,7 @@ import me.shaohui.advancedluban.OnCompressListener;
  * Created by Ankit on 19/01/18.
  */
 
-public class AddMemberActivity extends BaseActivity implements DatePickerDialog.OnDateSetListener {
+public class AddMemberActivity extends BaseActivity implements DatePickerDialog.OnDateSetListener, AddMemberView {
 
     private AppDatabase appDatabase;
     @Bind(R.id.edtName)
@@ -52,7 +55,17 @@ public class AddMemberActivity extends BaseActivity implements DatePickerDialog.
     Button btnImage;
     @Bind(R.id.btnSubmit)
     Button btnSubmit;
-    boolean isUploadedPic = true;
+    @Bind(R.id.back)
+    ImageButton back;
+    @Bind(R.id.txtTitle)
+    TextView txtTitle;
+
+    @OnClick(R.id.back)
+    void click() {
+        finish();
+    }
+
+    boolean isUploadedPic = false;
     private DatePickerDialog datePickerDialog;
     private Calendar calendar;
     private Date dob;
@@ -63,17 +76,19 @@ public class AddMemberActivity extends BaseActivity implements DatePickerDialog.
     private Uri uri;
     private static final int CAMERA = 3;
     private String image;
+    private String imageName;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_add);
+        setContentView(R.layout.activity_add);
         ButterKnife.bind(this);
         populate();
     }
 
-
-    private void populate() {
+    @Override
+    public void populate() {
+        txtTitle.setText("Add New Member");
         appDatabase = AppDatabase.getDatabase(getApplication());
         calendar = Calendar.getInstance();
         datePickerDialog = new DatePickerDialog(this, this, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
@@ -84,11 +99,13 @@ public class AddMemberActivity extends BaseActivity implements DatePickerDialog.
                     String name = edtName.getText().toString().trim();
                     String address = edtAddress.getText().toString().trim();
                     Date lud = Calendar.getInstance().getTime();
-                    AddMemberPresenter presenter = new AddMemberPresenter(AddMemberActivity.this);
+                    AddMemberPresenter presenter = new AddMemberPresenter(AddMemberActivity.this, AddMemberActivity.this);
                     image = getSharedPreferences("Temp", MODE_PRIVATE).getString("filepath", "");
-
-                    presenter.addMember(new MemberModel(name, address, lud, image, dob), appDatabase);
+                    imageName = edtName.getText().toString() + edtAddress.getText().toString();
+                    presenter.addMember(new MemberModel(name, address, lud, imageName, dob), appDatabase);
                     Toast.makeText(AddMemberActivity.this, "Success", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(AddMemberActivity.this, "Fill all entries", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -104,13 +121,17 @@ public class AddMemberActivity extends BaseActivity implements DatePickerDialog.
         btnImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ((ContextCompat.checkSelfPermission(AddMemberActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                        ContextCompat.checkSelfPermission(AddMemberActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                        ContextCompat.checkSelfPermission(AddMemberActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)) {
-                    showFileChooser();
-                } else {
-                    ActivityCompat.requestPermissions(AddMemberActivity.this, Permissions, PERMS_REQUEST_CODE);
+                if (edtName.getText().toString().length() != 0) {
+                    if ((ContextCompat.checkSelfPermission(AddMemberActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                            ContextCompat.checkSelfPermission(AddMemberActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                            ContextCompat.checkSelfPermission(AddMemberActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)) {
+                        showFileChooser();
+                    } else {
+                        ActivityCompat.requestPermissions(AddMemberActivity.this, Permissions, PERMS_REQUEST_CODE);
 
+                    }
+                } else {
+                    Toast.makeText(AddMemberActivity.this, "Please Enter Name First", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -120,10 +141,11 @@ public class AddMemberActivity extends BaseActivity implements DatePickerDialog.
     /*Trying out only with camera
     * Will implement Gallery option later
     */
-    private void showFileChooser() {
+    @Override
+    public void showFileChooser() {
         Intent CamIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
         File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-                "file" + edtName.getText() + ".jpg");
+                "file" + edtName.getText() +edtAddress.getText()+ ".jpg");
         uri = FileProvider.getUriForFile(AddMemberActivity.this, "edu.openapp.provider", file);
         getSharedPreferences("Temp", MODE_PRIVATE).edit().putString("Uri", file.toString()).apply();
         getSharedPreferences("Temp", MODE_PRIVATE).edit().putString("filepath", file.getAbsolutePath()).apply();
@@ -137,6 +159,11 @@ public class AddMemberActivity extends BaseActivity implements DatePickerDialog.
         CamIntent.putExtra("scale", true);
         CamIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivityForResult(CamIntent, CAMERA);
+    }
+
+    @Override
+    public void finishUpdate() {
+        finish();
     }
 
     @Override
@@ -155,9 +182,10 @@ public class AddMemberActivity extends BaseActivity implements DatePickerDialog.
     *App getting too slow while loading local images if image is not compressed
     * I have tried to handle this situation by capturing the image then saving temporary in SDcard at location, then reducing size and again writing this reduced image at same location
     */
-    private void compressImage() {
+    @Override
+    public void compressImage() {
         File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-                "file" + edtName.getText() + ".jpg");
+                "file" + edtName.getText()+edtAddress.getText() + ".jpg");
 
         Luban.compress(AddMemberActivity.this, file)
                 .putGear(Luban.FIRST_GEAR)      // set the compress mode, default is : THIRD_GEAR
@@ -169,13 +197,14 @@ public class AddMemberActivity extends BaseActivity implements DatePickerDialog.
 
                     @Override
                     public void onSuccess(File file) {
+                        isUploadedPic = true;
                         Toast.makeText(AddMemberActivity.this, "Compressed", Toast.LENGTH_SHORT).show();
                         File existfile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-                                "file" + edtName.getText() + ".jpg");
+                                "file" + edtName.getText() +edtAddress.getText()+ ".jpg");
                         if (existfile.exists())
                             existfile.delete();
                         File Finalfile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-                                "file" + edtName.getText() + ".jpg");
+                                "file" + edtName.getText()+edtAddress.getText() + ".jpg");
                         byte[] buffer = new byte[1024];
                         int length;
                         FileInputStream instream = null;
@@ -202,10 +231,13 @@ public class AddMemberActivity extends BaseActivity implements DatePickerDialog.
                         Toast.makeText(AddMemberActivity.this, "Error", Toast.LENGTH_SHORT).show();
                     }
                 });
+
+
     }
 
     //Checking Validations Of Fields Filled
-    private boolean check_field_filled() {
+    @Override
+    public boolean check_field_filled() {
         boolean valid = false;
 
         if (edtAddress.getText().toString().length() != 0 && edtDob.getText().toString().length() != 0 && edtName.getText().toString().length() != 0 && isUploadedPic)
@@ -230,11 +262,20 @@ public class AddMemberActivity extends BaseActivity implements DatePickerDialog.
         calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
         dob = calendar.getTime();
         int yr = dob.getYear();
-        if (dob.getYear() > 100) {
+        if (yr > 100) {
             yr = dob.getYear() - 100;
         }
         edtDob.setText(String.valueOf(dob.getDate()) + " / " + String.valueOf(dob.getMonth() + 1) + " / " + String.valueOf(yr));
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 }

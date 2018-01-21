@@ -5,6 +5,7 @@ import android.arch.persistence.room.PrimaryKey;
 import android.arch.persistence.room.TypeConverters;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -16,7 +17,7 @@ import edu.openapp.global.DateConverter;
  */
 
 @Entity
-public class MemberModel implements Serializable, Parcelable {
+public class MemberModel implements Serializable, Parcelable, Comparable<MemberModel> {
 
     @PrimaryKey(autoGenerate = true)
     public int id;
@@ -98,6 +99,11 @@ public class MemberModel implements Serializable, Parcelable {
         dest.writeSerializable(this.timestamp);
         dest.writeString(this.image);
         dest.writeSerializable(this.dob);
+    }
+
+    @Override
+    public int compareTo(@NonNull MemberModel o) {
+        return getTimestamp().compareTo(o.getTimestamp());
     }
 }
 

@@ -29,7 +29,7 @@ public interface MemberDao {
     @Query("select * from MemberModel where id = :id")
     MemberModel getItembyId(String id);
 
-    @Query("select id,name from MemberModel")
+    @Query("select id,image from MemberModel")
     List<MemberModel> getAllImage();
 
     @Insert(onConflict = REPLACE)

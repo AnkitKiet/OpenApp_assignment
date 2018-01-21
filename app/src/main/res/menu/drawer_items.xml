@@ -13,18 +13,13 @@
 
         <item
             android:id="@+id/add"
-            android:icon="@drawable/ic_people_black_24dp"
+            android:icon="@drawable/ic_group_add_black_24dp"
             android:title="@string/add" />
-
-        <!--<item-->
-            <!--android:id="@+id/History"-->
-            <!--android:icon="@drawable/ic_people_black_24dp"-->
-            <!--android:title="@string/view" />-->
 
 
         <item
             android:id="@+id/gallery"
-            android:icon="@drawable/ic_people_black_24dp"
+            android:icon="@drawable/ic_photo_black_24dp"
             android:title="@string/gallery" />
 
 

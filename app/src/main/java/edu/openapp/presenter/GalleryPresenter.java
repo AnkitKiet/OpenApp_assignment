@@ -2,6 +2,7 @@ package edu.openapp.presenter;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class GalleryPresenter {
         new GalleryPresenter.getAsyncTask(appDatabase).execute();
     }
 
-    private class getAsyncTask extends AsyncTask<Void, Void, Void> {
+    private class getAsyncTask extends AsyncTask<Object, Object, List<MemberModel>> {
 
         private AppDatabase db;
 
@@ -42,18 +43,19 @@ public class GalleryPresenter {
         protected void onPreExecute() {
             super.onPreExecute();
             Toast.makeText(context, "Fetching Data", Toast.LENGTH_SHORT).show();
+            galleryActivity.progressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected List<MemberModel> doInBackground(Object... params) {
             mList = db.itemAndPersonModel().getAllImage();
-            return null;
+            return mList;
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
+        protected void onPostExecute(List<MemberModel> aVoid) {
             super.onPostExecute(aVoid);
-            galleryActivity.setList(mList);
+            galleryActivity.setList(aVoid);
         }
     }
 }
